@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kastrula Games</title>
+  <link rel="icon" type="image/svg+xml" href="assets/image/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/arcade.css">
+</head>
+<body class="play">
+  <div class="backdrop dim" aria-hidden="true">
+    <div class="sun"></div>
+    <div class="floor"></div>
+  </div>
+
+  <div class="layout">
+    <aside class="side side-left">
+      <a class="win win-back" href="index.html" title="В меню (Esc на заставке)">
+        <span class="ico" id="back-ico"></span>
+        <span>В МЕНЮ</span>
+      </a>
+
+      <section class="win win-title">
+        <span class="win-label">Kastrula Games</span>
+        <h1 id="game-title" class="game-title"></h1>
+        <p id="game-desc" class="game-desc"></p>
+      </section>
+
+      <section class="win win-score">
+        <div class="stat stat-main">
+          <span class="win-label" id="score-label">СЧЁТ</span>
+          <span class="value" id="score">0</span>
+        </div>
+        <div class="stat">
+          <span class="win-label">РЕКОРД</span>
+          <span class="value" id="best">—</span>
+        </div>
+      </section>
+
+      <section class="win win-stats" id="stats-win" hidden>
+        <div id="hud-extra" class="stats"></div>
+      </section>
+
+      <section class="win win-tools">
+        <button id="pause" class="tool" type="button" title="Пауза (P)"><span class="ico"></span><span class="tool-label">Пауза</span></button>
+        <button id="restart" class="tool" type="button" title="Заново (R)"><span class="ico"></span><span class="tool-label">Заново</span></button>
+        <button id="mute" class="tool" type="button" title="Звук (M)"><span class="ico"></span><span class="tool-label">Звук</span></button>
+      </section>
+    </aside>
+
+    <main id="stage" class="stage">
+      <div class="screen">
+        <canvas id="game"></canvas>
+        <div id="overlay" class="overlay">
+          <div class="ov-card">
+            <h2 id="ov-title"></h2>
+            <p id="ov-text"></p>
+            <p id="ov-hint"></p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="side side-right">
+      <section class="win win-controls">
+        <span class="win-label">Управление</span>
+        <ul id="controls" class="controls"></ul>
+      </section>
+      <section class="win win-controls">
+        <span class="win-label">Общее</span>
+        <ul id="controls-common" class="controls"></ul>
+      </section>
+    </aside>
+  </div>
+
+  <div id="touch" class="touch"></div>
+
+  <script src="js/icons.js"></script>
+  <script src="js/controls.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/engine.js"></script>
+  <script>Arcade.boot();</script>
+</body>
+</html>

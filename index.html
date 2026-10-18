@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kastrula Games</title>
+  <link rel="icon" type="image/svg+xml" href="assets/image/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/arcade.css">
+  <script>
+    // Интро показываем при первом открытии сайта за сессию
+    try { if (!sessionStorage.getItem('kg-intro-seen')) document.documentElement.classList.add('intro'); }
+    catch (e) { document.documentElement.classList.add('intro'); }
+  </script>
+</head>
+<body class="menu">
+  <div class="intro-screen" id="intro" aria-hidden="true">
+    <div class="intro-bg"></div>
+    <div class="intro-logo-wrap"><h1 class="intro-logo" id="intro-logo"></h1></div>
+  </div>
+
+  <div class="beat-flash" aria-hidden="true"></div>
+  <div class="backdrop" aria-hidden="true">
+    <div class="beat-glow"></div>
+    <div class="sun"></div>
+    <canvas class="spectrum" id="spectrum"></canvas>
+    <div class="floor"></div>
+  </div>
+
+  <header class="hero">
+    <h1 class="logo">Kastrula Games</h1>
+  </header>
+
+  <main id="grid" class="grid"></main>
+
+  <footer class="menu-foot">Стрелки — выбор · Enter — играть · I — подробнее</footer>
+
+  <script src="js/icons.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/preview.js"></script>
+  <script src="js/controls.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="assets/sound/mainmenu.bass.js"></script>
+  <script src="assets/sound/mainmenu.spectrum.js"></script>
+  <script src="js/intro.js"></script>
+  <script src="js/spectrum.js"></script>
+</body>
+</html>
