@@ -30,18 +30,20 @@
       card.className = 'card';
       card.style.setProperty('--c', g.color);
       card.style.setProperty('--i', i);
-      const best = bestOf(g.id);
+      const best = g.secret ? 0 : bestOf(g.id);
+      const href = g.href || `play.html?game=${g.id}`;
+      if (g.secret) card.classList.add('secret', 'ready');
       card.innerHTML = `
-        <a class="card-link" href="play.html?game=${g.id}" tabindex="-1">
+        <a class="card-link" href="${href}" tabindex="-1">
           <div class="thumb">
-            <canvas></canvas>
+            ${g.secret ? '<div class="q-mark" aria-hidden="true"><span>?</span></div>' : '<canvas></canvas>'}
             <span class="play-chip">${Icons.play}ИГРАТЬ</span>
           </div>
         </a>
         <div class="info">
           <span class="num">${String(i + 1).padStart(2, '0')}</span>
           <div class="names">
-            <h2><a class="title-link" href="play.html?game=${g.id}">${g.title}</a></h2>
+            <h2><a class="title-link" href="${href}">${g.title}</a></h2>
             <button class="more" type="button">${Icons.info}Подробнее</button>
           </div>
           ${best ? `<span class="best" title="Рекорд">${Icons.trophy}${fmtBest(g.id, best)}</span>` : ''}
@@ -104,7 +106,7 @@
       <div class="detail-shade"></div>
       <section class="detail-win" role="dialog" aria-modal="true" aria-labelledby="detail-title">
         <button class="detail-close" type="button" aria-label="Закрыть">${Icons.close}</button>
-        <div class="detail-media"><canvas></canvas></div>
+        <div class="detail-media"><canvas></canvas><div class="q-mark big" aria-hidden="true"><span>?</span></div></div>
         <div class="detail-body">
           <div class="detail-head">
             <span class="detail-num"></span>
@@ -163,7 +165,10 @@
     setActive(id);
     Sound.init();
     Sound.sfx.whoosh();
-    if (typeof MenuMusic !== 'undefined') MenuMusic.setUnderwater(true);
+    // у секретной игры вместо «под водой» — замедленная низкая музыка и чёрно-белый фон
+    if (typeof MenuMusic !== 'undefined') { if (g.secret) MenuMusic.setSlow(true); else MenuMusic.setUnderwater(true); }
+    document.documentElement.classList.toggle('secret-bw', !!g.secret);
+    detail.root.classList.toggle('is-secret', !!g.secret);
 
     detail.root.style.setProperty('--c', g.color);
     q('.detail-num').textContent = String(c.index + 1).padStart(2, '0');
@@ -172,9 +177,9 @@
     q('.detail-desc').textContent = g.desc;
     q('.detail-how').textContent = g.how || '';
     const best = bestOf(id);
-    q('.detail-best').innerHTML = `${Icons.trophy}<div><span>РЕКОРД</span><b>${best ? fmtBest(id, best) : 'ещё нет'}</b></div>`;
+    q('.detail-best').innerHTML = `${Icons.trophy}<div><span>РЕКОРД</span><b>${g.secret ? '???' : best ? fmtBest(id, best) : 'ещё нет'}</b></div>`;
     q('.detail-controls').innerHTML = Controls.html(g.keys || []);
-    q('.detail-play').href = `play.html?game=${id}`;
+    q('.detail-play').href = g.href || `play.html?game=${id}`;
     q('.detail-body').scrollTop = 0;
 
     detail.root.hidden = false;
@@ -194,7 +199,10 @@
     const id = detail.open;
     detail.busy = true;
     Sound.sfx.blip(0.8);
-    if (typeof MenuMusic !== 'undefined') MenuMusic.setUnderwater(false);
+    if (typeof MenuMusic !== 'undefined') {
+      if (cards.get(id).game.secret) MenuMusic.setSlow(false); else MenuMusic.setUnderwater(false);
+    }
+    document.documentElement.classList.remove('secret-bw');
     detail.root.classList.remove('open');
     flipTo(cardRect(id));
     setTimeout(() => {
@@ -235,9 +243,10 @@
 
   // Готовим стартовые кадры: каждую игру прогоняем несколько секунд с автопилотом
   async function prepare() {
-    await Preview.load(GAMES.map(g => g.id));
+    await Preview.load(GAMES.filter(g => !g.secret).map(g => g.id));
     try { await document.fonts.ready; } catch { /* не важно */ }
     for (const g of GAMES) {
+      if (g.secret) continue;
       const card = cards.get(g.id);
       const p = Preview.create(g.id);
       if (!p) continue;

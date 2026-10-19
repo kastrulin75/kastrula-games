@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>???</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23111'/%3E%3Ctext x='32' y='47' font-family='monospace' font-size='44' font-weight='700' text-anchor='middle' fill='%23e8e8e8'%3E%3F%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/vault.css">
+</head>
+<body class="vault">
+  <canvas id="atmo" class="atmo" aria-hidden="true"></canvas>
+  <div class="vignette" id="vignette" aria-hidden="true"></div>
+
+  <a class="vault-exit" href="index.html"><span class="ico" id="exit-ico"></span>назад</a>
+
+  <main class="vault-panel" id="panel">
+    <div class="vault-steps" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <h1 class="vault-title" id="v-title"></h1>
+    <p class="vault-sub" id="v-sub"></p>
+    <div class="vault-body" id="v-body"></div>
+    <p class="vault-msg" id="v-msg" aria-live="polite"></p>
+  </main>
+
+  <div class="vault-flash" id="flash" aria-hidden="true"></div>
+  <div class="vault-end" id="end" aria-hidden="true"><span>. . .</span></div>
+
+  <script src="js/icons.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/vault.js"></script>
+</body>
+</html>

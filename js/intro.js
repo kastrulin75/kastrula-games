@@ -11,14 +11,16 @@ const MenuMusic = (() => {
   const AC = window.AudioContext || window.webkitAudioContext;
   let ac = null, gain = null, filter = null, lfo = null, lfoGain = null;
   let buffer = null, src = null, loading = null;
-  let playing = false, want = false, startAt = 0, offset = 0, underwater = false;
+  let playing = false, want = false, offset = 0, underwater = false;
+  // позиция в песне считается от «якоря»: так она верна и при замедлении
+  let anchorPos = 0, anchorT = 0, rate = 1, rateTimer = 0;
 
   // Фасад в духе <audio>: фон и спектроанализатор читают paused и currentTime
   const audio = {
     get paused() { return !playing; },
     get currentTime() {
       if (!playing || !buffer) return offset;
-      return (ac.currentTime - startAt) % buffer.duration;
+      return (anchorPos + (ac.currentTime - anchorT) * rate) % buffer.duration;
     },
   };
 
@@ -84,8 +86,10 @@ const MenuMusic = (() => {
     src.buffer = buffer;
     src.loop = true;
     src.connect(filter);
+    src.playbackRate.value = rate;
     src.start(0, offset % buffer.duration);
-    startAt = ac.currentTime - offset;
+    anchorPos = offset % buffer.duration;
+    anchorT = ac.currentTime;
     playing = true;
     const t = ac.currentTime;
     gain.gain.cancelScheduledValues(t);
@@ -142,7 +146,27 @@ const MenuMusic = (() => {
     if (playing) gain.gain.setTargetAtTime(targetVol(), t, 0.25);
   }
 
-  return { start, fadeOut, setUnderwater, audio };
+  // Плавно замедлить песню (и понизить тон) — как «зажёванная» плёнка, и обратно
+  function setSlow(on) {
+    const target = on ? 0.62 : 1;
+    clearInterval(rateTimer);
+    const from = rate, steps = on ? 24 : 14, ms = on ? 1100 : 600;
+    let k = 0;
+    rateTimer = setInterval(() => {
+      k++;
+      const next = from + (target - from) * (k / steps);
+      if (playing && ac) {
+        anchorPos = audio.currentTime;
+        anchorT = ac.currentTime;
+        src.playbackRate.setValueAtTime(next, ac.currentTime);
+      }
+      rate = next;
+      if (k >= steps) clearInterval(rateTimer);
+    }, ms / steps);
+    if (ac && playing) gain.gain.setTargetAtTime(Sound.muted ? 0 : (on ? VOL * 0.8 : VOL), ac.currentTime, 0.4);
+  }
+
+  return { start, fadeOut, setUnderwater, setSlow, audio };
 })();
 
 MenuMusic.start();

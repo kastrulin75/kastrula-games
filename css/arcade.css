@@ -929,3 +929,76 @@ html.detail-open body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .detail-shade, .detail-body { transition-duration: 0.01s; }
 }
+
+/* ---------- Секретная карточка «???» ---------- */
+
+/* Знак вопроса на помехах вместо превью игры */
+.q-mark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px),
+    radial-gradient(circle at 50% 50%, #2b2b2b 0%, #050505 75%);
+}
+.q-mark::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1.4px),
+    radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1.4px);
+  background-size: 7px 7px, 11px 11px;
+  background-position: 0 0, 3px 5px;
+  animation: q-static 0.18s steps(3) infinite;
+  opacity: 0.55;
+}
+@keyframes q-static {
+  33% { transform: translate(-4px, 3px); }
+  66% { transform: translate(3px, -5px); }
+}
+.q-mark span {
+  position: relative;
+  font-family: var(--pixel);
+  font-size: clamp(48px, 7vw, 84px);
+  color: #e8e8e8;
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+  animation: q-glitch 3.2s steps(1) infinite;
+}
+@keyframes q-glitch {
+  0%, 86%, 100% { transform: none; text-shadow: 0 0 18px rgba(255, 255, 255, 0.35); opacity: 1; }
+  87% { transform: translate(-5px, 1px) skewX(-12deg); text-shadow: -4px 0 #ff2e3a, 4px 0 #2ee6ff; }
+  89% { transform: translate(4px, -2px); text-shadow: 4px 0 #ff2e3a, -4px 0 #2ee6ff; opacity: 0.6; }
+  91% { transform: translate(-2px, 0) skewX(8deg); opacity: 1; }
+  93% { opacity: 0.2; }
+  94% { opacity: 1; transform: none; }
+}
+.card.secret { border-color: rgba(255, 255, 255, 0.12); }
+.card.secret .info h2, .card.secret .num { color: #bdbdbd; letter-spacing: 3px; }
+.card.secret:hover .q-mark span, .card.secret:focus-within .q-mark span, .card.secret.live .q-mark span { animation-duration: 0.9s; }
+
+/* В окне «Подробнее» секретной игры — тоже только знак вопроса */
+.detail-media .q-mark { display: none; }
+.detail.is-secret .detail-media canvas { visibility: hidden; }
+.detail.is-secret .detail-media .q-mark { display: grid; }
+.detail.is-secret .q-mark span { font-size: clamp(90px, 14vw, 170px); }
+.detail.is-secret .detail-win {
+  border-color: #cfcfcf;
+  background: linear-gradient(180deg, rgba(28, 28, 28, 0.97), rgba(8, 8, 8, 0.98));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 30px 90px -20px rgba(255, 255, 255, 0.25), 0 30px 60px -20px #000;
+}
+.detail.is-secret .detail-title, .detail.is-secret .detail-num { color: #e6e6e6; text-shadow: none; letter-spacing: 3px; }
+.detail.is-secret .detail-play { background: #e6e6e6; box-shadow: 0 10px 30px -10px rgba(255, 255, 255, 0.5); }
+.detail.is-secret .detail-best { border-color: rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.04); color: #e6e6e6; }
+
+/* Пока открыто окно секретной игры — всё за ним становится чёрно-белым */
+.backdrop, .hero, .grid, .beat-flash, .menu-foot { transition: filter 0.9s ease; }
+html.secret-bw .backdrop,
+html.secret-bw .hero,
+html.secret-bw .grid,
+html.secret-bw .beat-flash,
+html.secret-bw .menu-foot { filter: grayscale(1) brightness(0.8) contrast(1.1); }
+.detail.is-secret .key { background: linear-gradient(180deg, #3a3a3a, #222); border-color: rgba(255, 255, 255, 0.22); }
+.detail.is-secret .detail-body h3 { color: #8a8a8a; }
