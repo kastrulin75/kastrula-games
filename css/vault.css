@@ -200,31 +200,65 @@ html, body {
 .switch.flip::after { box-shadow: inset 0 10px 0 var(--fg); }
 .switch:hover, .switch:focus-visible { border-color: var(--fg); outline: none; }
 
-/* замок III: подсказки к коду сейфа */
-.clues { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-.clue {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #0c0c0c;
-  text-align: left;
-}
-.clue .digits { display: flex; gap: 4px; flex-shrink: 0; }
-.clue .digits b {
-  width: 30px;
-  height: 34px;
+/* замок III: ячейки сейфа, подсветка отгаданного и история попыток */
+.safe-slots { display: flex; gap: 12px; justify-content: center; }
+.slot {
+  width: 64px;
+  height: 76px;
   display: grid;
   place-items: center;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: #0c0c0c;
+  font-family: var(--pixel);
+  font-weight: normal;
+  font-size: 26px;
+  color: #555;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+.slot.hit {
+  border-color: #39d353;
+  background: rgba(57, 211, 83, 0.14);
+  color: #7dff95;
+  box-shadow: 0 0 20px rgba(57, 211, 83, 0.45);
+  animation: pop 0.35s ease;
+}
+@keyframes pop { 50% { transform: scale(1.12); } }
+
+.safe-info { display: flex; flex-direction: column; gap: 6px; min-height: 20px; }
+.safe-info p { margin: 0; font-size: 14px; color: #cfcfcf; }
+.safe-info p:empty { display: none; }
+.safe-info b {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 28px;
+  margin: 0 2px;
   border-radius: 6px;
-  background: #1b1b1b;
+  font-family: var(--pixel);
+  font-weight: normal;
+  font-size: 12px;
+}
+.safe-present b { background: rgba(255, 204, 51, 0.16); border: 1px solid #ffcc33; color: #ffd966; }
+.safe-absent { opacity: 0.6; }
+.safe-absent b { background: #1a1a1a; color: #777; }
+
+.safe-history { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.guess { display: flex; gap: 6px; }
+.guess b {
+  width: 34px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
   font-family: var(--pixel);
   font-weight: normal;
   font-size: 13px;
 }
-.clue span { font-size: 13.5px; line-height: 1.35; color: #cfcfcf; }
+.guess .hit { background: #2a9d40; color: #fff; }
+.guess .near { background: #8a6d12; color: #fff; }
+.guess .miss { background: #1c1c1c; color: #666; }
+.guess:not(:first-child) { opacity: 0.55; }
 
 .vault-flash {
   position: fixed;

@@ -155,57 +155,77 @@
   }
   function popcount(m) { let c = 0; while (m) { c += m & 1; m >>= 1; } return c; }
 
-  // Замок III: код сейфа по подсказкам «верна / на своём месте»
-  function score(code, guess) {
-    let a = 0, b = 0;
-    for (let i = 0; i < 3; i++) {
-      if (guess[i] === code[i]) a++;
-      else if (code.includes(guess[i])) b++;
-    }
-    return [a, b];
-  }
-  const FEEDBACK = {
-    '1,0': 'одна цифра верна и стоит на своём месте',
-    '0,1': 'одна цифра верна, но стоит не на своём месте',
-    '0,2': 'две цифры верны, но обе не на своих местах',
-    '1,1': 'две цифры верны: одна на своём месте, другая нет',
-    '2,0': 'две цифры верны и стоят на своих местах',
-    '0,0': 'ни одна цифра не подходит',
-    '0,3': 'все цифры верны, но все не на своих местах',
-    '1,2': 'все цифры верны, но на своём месте только одна',
-  };
-  function makeSafe() {
-    const all = [];
-    for (let x = 0; x < 10; x++) for (let y = 0; y < 10; y++) for (let z = 0; z < 10; z++) {
-      if (x !== y && y !== z && x !== z) all.push(`${x}${y}${z}`);
-    }
-    for (;;) {
-      const code = pick(all);
-      let cands = all;
-      const clues = [];
-      for (let guard = 0; guard < 400 && clues.length < 6 && cands.length > 1; guard++) {
-        const g = pick(all);
-        if (g === code) continue;
-        const fb = score(code, g);
-        const key = fb.join(',');
-        if (!FEEDBACK[key]) continue;
-        const next = cands.filter(c => score(c, g).join(',') === key);
-        if (next.length === cands.length) continue;
-        cands = next;
-        clues.push({ g, key });
-      }
-      if (cands.length === 1 && clues.length >= 3) return { code, clues };
-    }
-  }
+  // Замок III: угадать трёхзначный код сейфа. После каждой попытки цифра на своём месте
+  // загорается зелёным и остаётся в ячейке, цифра «есть в коде, но не здесь» попадает в список ниже.
   function lock3() {
-    setHead('ЗАМОК III', 'Найди трёхзначный код сейфа. Цифры в коде не повторяются.');
-    const { code, clues } = makeSafe();
-    body.innerHTML = `<div class="clues">${clues.map(c =>
-      `<div class="clue"><div class="digits">${[...c.g].map(d => `<b>${d}</b>`).join('')}</div><span>${FEEDBACK[c.key]}</span></div>`).join('')}</div>`;
+    setHead('ЗАМОК III', 'Угадай трёхзначный код сейфа. Цифры в коде не повторяются.');
+    const digits = shuffledDigits();
+    const code = digits.slice(0, 3);
+    const known = [null, null, null];   // отгаданные позиции
+    const present = new Set();          // есть в коде, но место пока не найдено
+    const absent = new Set();           // точно нет в коде
+
+    body.innerHTML = `
+      <div class="safe-slots">${[0, 1, 2].map(i => `<b class="slot" data-i="${i}">?</b>`).join('')}</div>
+      <div class="safe-info">
+        <p class="safe-present"></p>
+        <p class="safe-absent"></p>
+      </div>
+      <div class="safe-history"></div>`;
+    const slots = [...body.querySelectorAll('.slot')];
+    const presentEl = body.querySelector('.safe-present');
+    const absentEl = body.querySelector('.safe-absent');
+    const history = body.querySelector('.safe-history');
+
+    function paint() {
+      slots.forEach((s, i) => {
+        s.textContent = known[i] ?? '?';
+        s.classList.toggle('hit', known[i] !== null);
+      });
+      const rest = [...present].filter(d => !known.includes(d));
+      presentEl.innerHTML = rest.length
+        ? `Есть в коде, но не на своём месте: ${rest.map(d => `<b>${d}</b>`).join(' ')}`
+        : '';
+      absentEl.innerHTML = absent.size
+        ? `Нет в коде: ${[...absent].sort().map(d => `<b>${d}</b>`).join(' ')}`
+        : '';
+    }
+
     form('код', (v, input) => {
-      if (v === code) pass(finale);
-      else fail(input, 'НЕВЕРНО');
+      if (!/^\d{3}$/.test(v)) { fail(input, 'НУЖНО 3 ЦИФРЫ'); return; }
+      if (new Set(v).size < 3) { fail(input, 'ЦИФРЫ НЕ ПОВТОРЯЮТСЯ'); return; }
+      const g = [...v];
+      const marks = g.map((d, i) => (d === code[i] ? 'hit' : code.includes(d) ? 'near' : 'miss'));
+      g.forEach((d, i) => {
+        if (marks[i] === 'hit') { known[i] = d; present.add(d); }
+        else if (marks[i] === 'near') present.add(d);
+        else absent.add(d);
+      });
+      const row = document.createElement('div');
+      row.className = 'guess';
+      row.innerHTML = g.map((d, i) => `<b class="${marks[i]}">${d}</b>`).join('');
+      history.prepend(row);
+      while (history.children.length > 5) history.lastChild.remove();
+      paint();
+      if (v === code.join('')) { pass(finale); return; }
+      const hits = marks.filter(m => m === 'hit').length;
+      if (hits) {
+        msg.className = 'vault-msg ok';
+        msg.textContent = hits === 1 ? 'ОДНА НА МЕСТЕ' : 'ДВЕ НА МЕСТЕ';
+        Sound.tone({ freq: 520, dur: 0.12, type: 'square', vol: 0.12 });
+        target = Math.min(1, target + 0.03);
+        input.select();
+      } else {
+        fail(input, 'НЕВЕРНО');
+      }
     }, { numeric: true, max: 3, button: 'ОТКРЫТЬ' });
+    paint();
+  }
+  // десять цифр в случайном порядке
+  function shuffledDigits() {
+    const d = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+    return d;
   }
 
   // ---------- Финал ----------
