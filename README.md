@@ -10,7 +10,7 @@
 | Пакман | Doodle Jump | 2048 |
 | Арканоид | Helix Jump | Пузыри |
 | Space Invaders | Jetpack | Три в ряд |
-| Астероиды | Geometry Dash | Lights Out |
+| Астероиды | Динозаврик | Lights Out |
 | Галага | | Сапёр |
 | Missile Command | | |
 | Лунный модуль | | |

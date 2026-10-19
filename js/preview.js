@@ -82,9 +82,13 @@ const Preview = (() => {
       io.hold('right', l.a < -0.08);
     },
     jetpack(d, io) { io.hold('action', Math.sin(io.t * 2.2) > 0); },
-    geometry(d, io) {
-      const ahead = d.objs && d.objs.find(o => o.x > d.x + 6 && o.x < d.x + 70 && !(o.type === 'block' && d.p.y <= o.y - 30));
-      io.hold('action', !!ahead);
+    dino(d, io) {
+      if (!d.started) { io.press('action'); return; }
+      const near = d.obs && d.obs.find(o => o.x + o.w > 60 && o.x < 60 + d.speed * 0.32);
+      const birdMid = near && near.kind === 'bird' && near.y > 200 && near.y < 230;
+      const birdHigh = near && near.kind === 'bird' && near.y <= 200;
+      io.hold('down', !!birdMid);
+      io.hold('action', !!near && !birdMid && !birdHigh);
     },
     lightsout(d, io) { if (rnd() < 0.03) io.pointer('down', 20 + rnd() * 400, 20 + rnd() * 400); },
     minesweeper(d, io) {
@@ -95,8 +99,10 @@ const Preview = (() => {
   // Сколько секунд прогнать игру перед снимком и где центр кадра по вертикали (0 — верх, 1 — низ)
   const WARMUP = { missile: 9, galaga: 6, asteroids: 3 };
   const FOCUS = { doodle: 0.45, flappy: 0.45, helix: 0.4, bubble: 0.3 };
+  // По горизонтали (0 — левый край, 1 — правый): широким играм сдвигаем кадр к главному герою
+  const FOCUS_X = { dino: 0.27 };
   // Не снимать кадр, пока игра в «проигрышной» паузе
-  const BUSY = { minesweeper: d => d.endT > 0 || d.over, geometry: d => d.p && d.p.dead > 0, flappy: d => d.dead };
+  const BUSY = { minesweeper: d => d.endT > 0 || d.over, dino: d => d.d && d.d.dead, flappy: d => d.dead };
 
   function create(id) {
     const def = defs[id];
@@ -201,7 +207,7 @@ const Preview = (() => {
       for (let i = 0; i < 600 && BUSY[id] && BUSY[id](def); i++) step(1 / 60);
     }
 
-    return { id, W, H, canvas, step, render, warmup, focus: FOCUS[id] ?? 0.5, get broken() { return broken; } };
+    return { id, W, H, canvas, step, render, warmup, focus: FOCUS[id] ?? 0.5, focusX: FOCUS_X[id] ?? 0.5, get broken() { return broken; } };
   }
 
   return { load, create };

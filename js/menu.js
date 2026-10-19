@@ -83,7 +83,8 @@
       return;
     }
     const dy = Math.min(0, Math.max(c.height - dh, c.height / 2 - dh * p.focus));
-    ctx.drawImage(p.canvas, (c.width - dw) / 2, dy, dw, dh);
+    const dx = Math.min(0, Math.max(c.width - dw, c.width / 2 - dw * p.focusX));
+    ctx.drawImage(p.canvas, dx, dy, dw, dh);
   }
   const blit = card => blitTo(card.canvas, card.preview);
 
